@@ -1,0 +1,12 @@
+# docker-compose.yml
+version: "3"
+services:
+  mongo:
+    image: mongo:5.0
+    container_name: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+    restart: unless-stopped
+    ports:
+      - "27017:27017"

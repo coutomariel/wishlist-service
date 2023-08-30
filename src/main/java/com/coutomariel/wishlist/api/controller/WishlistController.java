@@ -1,11 +1,14 @@
 package com.coutomariel.wishlist.api.controller;
 
-import com.coutomariel.wishlist.api.mapper.ProductMapper;
+import com.coutomariel.wishlist.api.mapper.WishlistMapper;
 import com.coutomariel.wishlist.api.request.ProductRequest;
 import com.coutomariel.wishlist.api.response.CheckedProductResponse;
 import com.coutomariel.wishlist.api.response.ProductResponse;
-import com.coutomariel.wishlist.domain.domain.Product;
+import com.coutomariel.wishlist.api.response.WishlistResponse;
+import com.coutomariel.wishlist.domain.entity.Product;
+import com.coutomariel.wishlist.domain.entity.Wishlist;
 import com.coutomariel.wishlist.domain.service.WishlistService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +22,7 @@ import java.util.Optional;
 public class WishlistController implements WishlistControllerContract{
 
     private final WishlistService service;
-    private final ProductMapper mapper;
+    private final WishlistMapper mapper;
 
     private static final String ROUTE_ADD_PRODUCT = "/{customerId}/products";
     private static final String ROUTE_REMOVE_PRODUCT = "/{customerId}/products/{productId}";
@@ -29,8 +32,9 @@ public class WishlistController implements WishlistControllerContract{
     @Override
     @PostMapping(ROUTE_ADD_PRODUCT)
     @ResponseStatus(HttpStatus.CREATED)
-    public void addProduct(@PathVariable String customerid, @RequestBody ProductRequest request) {
-        service.add(mapper.mapToProductEntity(customerid, request));
+    public WishlistResponse addProduct(@PathVariable String customerId, @Valid @RequestBody ProductRequest request) {
+        Wishlist wishlist = service.add(customerId, mapper.mapToProductEntity(request));
+        return mapper.mapToWishlistResponse(wishlist);
     }
 
     @Override
