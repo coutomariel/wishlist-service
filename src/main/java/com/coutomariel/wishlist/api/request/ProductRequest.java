@@ -2,17 +2,15 @@ package com.coutomariel.wishlist.api.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
+@Data
+@Builder
 public class ProductRequest {
     @NotBlank
     @Schema(description = "ID do produto.")
-    private String id;
+    private String productId;
     @NotBlank
     @Schema(description = "Nome do produto.")
     private String name;

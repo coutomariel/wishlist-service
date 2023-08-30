@@ -3,6 +3,7 @@ package com.coutomariel.wishlist.api.controller;
 import com.coutomariel.wishlist.api.request.ProductRequest;
 import com.coutomariel.wishlist.api.response.CheckedProductResponse;
 import com.coutomariel.wishlist.api.response.ProductResponse;
+import com.coutomariel.wishlist.api.response.WishlistResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -26,7 +27,7 @@ public interface WishlistControllerContract {
             @Parameter(name = "customerId", in = ParameterIn.PATH, description = "ID do cliente", required = true),
             @Parameter(name = "productId", in = ParameterIn.PATH, description = "ID do produto", required = true)}
     )
-    void addProduct(String customerid, ProductRequest request);
+    WishlistResponse addProduct(String customerid, ProductRequest request);
 
     @Operation(description = "API para remover um produto da wishlist de um cliente")
     @ApiResponses(value = {
