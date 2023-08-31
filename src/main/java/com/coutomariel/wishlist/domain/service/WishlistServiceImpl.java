@@ -3,9 +3,11 @@ package com.coutomariel.wishlist.domain.service;
 import com.coutomariel.wishlist.domain.entity.Product;
 import com.coutomariel.wishlist.domain.entity.Wishlist;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
+import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.repository.WishlistRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -47,8 +49,20 @@ public class WishlistServiceImpl implements WishlistService {
     }
 
     @Override
+    @Transactional
     public void remove(String customerId, String productId) {
+        Wishlist wishlist = repository.findByIdAndProduct(customerId, productId)
+                .orElseThrow(() -> new ProductNotFoundInWishlistCustomerException(String.format(
+                        "O produto ID:%s não está associado com uma lista do cliente ID:%s.", productId, customerId)));
 
+        List<Product> products = wishlist.getProducts();
+        if (products.size()==1){
+            repository.delete(wishlist);
+            return;
+        }
+
+        products.removeIf(p -> p.getProductId().equals(productId));
+        repository.save(wishlist);
     }
 
     @Override

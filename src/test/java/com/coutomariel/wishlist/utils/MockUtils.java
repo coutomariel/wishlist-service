@@ -5,9 +5,7 @@ import com.coutomariel.wishlist.domain.entity.Product;
 import com.coutomariel.wishlist.domain.entity.Wishlist;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 
 public class MockUtils {
     public static Product mockProduct() {
@@ -35,4 +33,11 @@ public class MockUtils {
     }
 
 
+    public static List<Product> mockProductList(Integer qtd) {
+        List<Product> products = new LinkedList<>();
+        for (int i = 0; i < qtd; i++) {
+            products.add(MockUtils.mockProduct());
+        }
+        return products;
+    }
 }
