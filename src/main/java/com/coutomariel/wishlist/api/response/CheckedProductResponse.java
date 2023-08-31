@@ -1,13 +1,13 @@
 package com.coutomariel.wishlist.api.response;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CheckedProductResponse {
     private Boolean exists;
-    private ProductResponse productResponse;
+    private ProductResponse product;
 }
