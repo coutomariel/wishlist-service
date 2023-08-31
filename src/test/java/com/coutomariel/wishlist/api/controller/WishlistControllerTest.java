@@ -4,6 +4,7 @@ import com.coutomariel.wishlist.api.request.ProductRequest;
 import com.coutomariel.wishlist.domain.entity.Product;
 import com.coutomariel.wishlist.domain.entity.Wishlist;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
+import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.service.WishlistServiceImpl;
 import com.coutomariel.wishlist.utils.MockUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
@@ -25,7 +25,10 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
 @SpringBootTest
@@ -46,6 +49,7 @@ class WishlistControllerTest {
 
 
     private static final String ROUTE_ADD_PRODUCT = "/wishlist/{customerId}/products";
+    private static final String ROUTE_REMOVE_PRODUCT = "/wishlist/{customerId}/products/{productId}";
 
     @Test
     @DisplayName("give a valid request to add product in customer wishlist, then return 201 created")
@@ -63,11 +67,10 @@ class WishlistControllerTest {
         ProductRequest request = MockUtils.mockProductRequest();
         String jsonRequest = objectMapper.writeValueAsString(request);
 
-        mvc.perform(MockMvcRequestBuilders
-                .post(ROUTE_ADD_PRODUCT, customerId)
-                .content(jsonRequest)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+        mvc.perform(post(ROUTE_ADD_PRODUCT, customerId)
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
@@ -79,8 +82,7 @@ class WishlistControllerTest {
         ProductRequest requestWithoutMandatoryFields = ProductRequest.builder().build();
         String jsonRequest = objectMapper.writeValueAsString(requestWithoutMandatoryFields);
 
-        mvc.perform(MockMvcRequestBuilders
-                        .post(ROUTE_ADD_PRODUCT, customerId)
+        mvc.perform(post(ROUTE_ADD_PRODUCT, customerId)
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -99,12 +101,34 @@ class WishlistControllerTest {
         when(service.add(anyString(), any(Product.class)))
                 .thenThrow(ProductAlreadyExistsInCustomerWishlistException.class);
 
-        mvc.perform(MockMvcRequestBuilders
-                        .post(ROUTE_ADD_PRODUCT, customerId)
+        mvc.perform(post(ROUTE_ADD_PRODUCT, customerId)
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity());
+    }
+
+    @Test
+    @DisplayName("given a product remove request, when exists by product and wishlist, then successfully")
+    void removeProductFromCustomerWishlist() throws Exception {
+        String randomId = UUID.randomUUID().toString();
+        doNothing().when(service).remove(randomId, randomId);
+
+        mvc.perform(delete(ROUTE_REMOVE_PRODUCT, randomId, randomId))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("given a product remove request, when does not found, then throw exception")
+    void removeProductThatNotExistsInCustomerWishlist() throws Exception {
+        String randomId = UUID.randomUUID().toString();
+        doThrow(new ProductNotFoundInWishlistCustomerException("mensagem de erro"))
+                .when(service).remove(randomId, randomId);
+
+        mvc.perform(delete(ROUTE_REMOVE_PRODUCT, randomId, randomId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("mensagem de erro"));
     }
 
 }

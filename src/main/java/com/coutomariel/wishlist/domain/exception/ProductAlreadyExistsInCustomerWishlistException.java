@@ -1,10 +1,11 @@
 package com.coutomariel.wishlist.domain.exception;
 
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
-@Data
+@Getter
 public class ProductAlreadyExistsInCustomerWishlistException extends RuntimeException {
     private final HttpStatusCode statusCode = HttpStatus.UNPROCESSABLE_ENTITY;
     public ProductAlreadyExistsInCustomerWishlistException(String productId) {

@@ -3,6 +3,7 @@ package com.coutomariel.wishlist.domain.service;
 import com.coutomariel.wishlist.domain.entity.Product;
 import com.coutomariel.wishlist.domain.entity.Wishlist;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
+import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.repository.WishlistRepository;
 import com.coutomariel.wishlist.utils.MockUtils;
 import org.junit.jupiter.api.Assertions;
@@ -15,10 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -83,7 +81,7 @@ class WishlistServiceImplTest {
 
         String expectedProductId = product.getProductId();
         String expectedMessage = String.format(
-                "Produto ID: %s já existe na lista de desejos do cliente.",expectedProductId
+                "Produto ID: %s já existe na lista de desejos do cliente.", expectedProductId
         );
         String actualMessage = exception.getMessage();
 
@@ -92,6 +90,78 @@ class WishlistServiceImplTest {
     }
 
 
+    @Test
+    @DisplayName("Given a remove product request, whem wishlist just a one item and its match, then delete wihlist")
+    void removeUniqueProductFromListAndDeleteIt() {
+        String customerId = UUID.randomUUID().toString();
+        Product product = MockUtils.mockProduct();
+
+        Wishlist mockWishlistFromRepository = Wishlist.builder()
+                .id(customerId)
+                .products(Collections.singletonList(product))
+                .build();
+
+        when(repository.findByIdAndProduct(anyString(), anyString()))
+                .thenReturn(Optional.of(mockWishlistFromRepository));
+
+        doNothing().when(repository).delete(any(Wishlist.class));
+
+
+        service.remove(customerId, product.getProductId());
+
+        verify(repository, times(1)).findByIdAndProduct(anyString(), anyString());
+        verify(repository, times(1)).delete(any(Wishlist.class));
+        verify(repository, times(0)).save(any(Wishlist.class));
+
+    }
+
+    @Test
+    @DisplayName("Given a remove product request, whem wishlist has many items, then remove it from wishlist")
+    void removeProductFroWishilistWithMoreItems() {
+        String customerId = UUID.randomUUID().toString();
+        List<Product> products = MockUtils.mockProductList(2);
+        Wishlist mockWishlistFromRepository = Wishlist.builder()
+                .id(customerId)
+                .products(products)
+                .build();
+
+        when(repository.findByIdAndProduct(anyString(), anyString()))
+                .thenReturn(Optional.of(mockWishlistFromRepository));
+
+        when(repository.save(any(Wishlist.class))).thenReturn(null);
+
+        service.remove(customerId, customerId);
+
+        verify(repository, times(1)).findByIdAndProduct(anyString(), anyString());
+        verify(repository, times(0)).delete(any(Wishlist.class));
+        verify(repository, times(1)).save(any(Wishlist.class));
+    }
+
+    @Test
+    @DisplayName("Given a product not present in customer wishlist, when try to remove, then throws")
+    void notFoundProdutToRemove() {
+        Product product = MockUtils.mockProduct();
+        String customerId = UUID.randomUUID().toString();
+
+        when(repository.findByIdAndProduct(anyString(), anyString())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(ProductNotFoundInWishlistCustomerException.class, () -> {
+            service.remove(customerId, product.getProductId());
+        });
+
+        String expectedMessage = String.format(
+                "O produto ID:%s não está associado com uma lista do cliente ID:%s.",
+                product.getProductId(), customerId
+        );
+
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+
+        verify(repository, times(1)).findByIdAndProduct(anyString(), anyString());
+        verify(repository, times(0)).delete(any(Wishlist.class));
+        verify(repository, times(0)).save(any(Wishlist.class));
+
+    }
 
 
 }
