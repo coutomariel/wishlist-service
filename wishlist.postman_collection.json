@@ -1,0 +1,130 @@
+{
+	"info": {
+		"_postman_id": "46c372e4-4d7a-4216-9730-057af43395a7",
+		"name": "jaya-wishlist",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5554346",
+		"_collection_link": "https://speeding-satellite-161449.postman.co/workspace/cursodsouza~793e361b-52dc-4403-a87e-3a1f2cfbaa7f/collection/5554346-46c372e4-4d7a-4216-9730-057af43395a7?action=share&source=collection_link&creator=5554346"
+	},
+	"item": [
+		{
+			"name": "add-product-to-customer-wishlist",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "customerId",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\" : \"PH-2121\",\n    \"name\" : \"Smartv philips 32'\",\n    \"description\" : \"Smartv 32' 4k android tv\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/wishlist/YZ5533/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wishlist",
+						"YZ5533",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "product-from-customer-wishlist",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "customerId",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/wishlist/YZ5533/products/PH-1235",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wishlist",
+						"YZ5533",
+						"products",
+						"PH-1235"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "customer-wishlist",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "customerId",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/wishlist/YZ5533/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wishlist",
+						"YZ5533",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "product-in-customer-wishlist",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "customerId",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/wishlist/XTZ14/products/PH-2121",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wishlist",
+						"XTZ14",
+						"products",
+						"PH-2121"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
