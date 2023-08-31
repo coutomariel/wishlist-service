@@ -27,7 +27,7 @@ public class WishlistController implements WishlistControllerContract{
     private static final String ROUTE_ADD_PRODUCT = "/{customerId}/products";
     private static final String ROUTE_REMOVE_PRODUCT = "/{customerId}/products/{productId}";
     private static final String ROUTE_SEARCH_CUSTOMER_WISHLIST = "/{customerId}/products";
-    private static final String ROUTE_CHECK_PRODUCT_IN_CUSTOMER_WISHLIST = "/{customer_id}/products/{product_id}";
+    private static final String ROUTE_CHECK_PRODUCT_IN_CUSTOMER_WISHLIST = "/{customerId}/products/{productId}";
 
     @Override
     @PostMapping(ROUTE_ADD_PRODUCT)
@@ -55,13 +55,7 @@ public class WishlistController implements WishlistControllerContract{
     public CheckedProductResponse checkProductInCustomerWishlist(
             @PathVariable String customerId, @PathVariable String productId
     ) {
-        Optional<Product> product = service.getProductByIdInCustomerWishList(customerId, productId);
-        Optional<ProductResponse> productResponse = product.map(mapper::mapToProductResponse);
-        return CheckedProductResponse
-                .builder()
-                .exists(product.isPresent())
-                .productResponse(productResponse.orElse(null))
-                .build();
+        return mapper.mapToCheckedProductResponse(service.getProductByIdInCustomerWishList(customerId, productId));
     }
 
 }

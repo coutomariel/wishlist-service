@@ -1,6 +1,7 @@
 package com.coutomariel.wishlist.api.mapper;
 
 import com.coutomariel.wishlist.api.request.ProductRequest;
+import com.coutomariel.wishlist.api.response.CheckedProductResponse;
 import com.coutomariel.wishlist.api.response.ProductResponse;
 import com.coutomariel.wishlist.api.response.WishlistResponse;
 import com.coutomariel.wishlist.domain.entity.Product;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -44,5 +46,13 @@ public class WishlistMapper {
                 .customerId(wishlist.getId())
                 .products(productResponses)
                 .build();
+    }
+
+    public CheckedProductResponse mapToCheckedProductResponse(Optional<Product> product){
+        if (product.isEmpty()){
+            return CheckedProductResponse.builder().exists(false).build();
+        }
+        ProductResponse productResponse = mapToProductResponse(product.get());
+        return CheckedProductResponse.builder().exists(true).product(productResponse).build();
     }
 }

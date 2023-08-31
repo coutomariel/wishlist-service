@@ -10,7 +10,7 @@ import java.util.*;
 public class MockUtils {
     public static Product mockProduct() {
         return Product.builder()
-                .productId(UUID.randomUUID().toString())
+                .productId(randomId())
                 .name("product name")
                 .description("description")
                 .createdOn(LocalDateTime.now())
@@ -26,7 +26,7 @@ public class MockUtils {
 
     public static ProductRequest mockProductRequest() {
         return ProductRequest.builder()
-                .productId(UUID.randomUUID().toString())
+                .productId(randomId())
                 .name("product name")
                 .description("description")
                 .build();
@@ -39,5 +39,9 @@ public class MockUtils {
             products.add(MockUtils.mockProduct());
         }
         return products;
+    }
+
+    public static String randomId() {
+        return UUID.randomUUID().toString();
     }
 }
