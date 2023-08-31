@@ -46,8 +46,8 @@ public class WishlistController implements WishlistControllerContract{
 
     @Override
     @GetMapping(ROUTE_SEARCH_CUSTOMER_WISHLIST)
-    public List<ProductResponse> getCustomerWishlist(@PathVariable String customerId){
-        return mapper.mapToProductResponseList(service.getCustomerWishlist(customerId));
+    public WishlistResponse getCustomerWishlist(@PathVariable String customerId){
+        return mapper.mapToWishlistResponse(service.getCustomerWishlist(customerId));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.coutomariel.wishlist.api.exception;
 
+import com.coutomariel.wishlist.domain.exception.CustomerWishlistNotFoundException;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
 import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import org.springframework.http.HttpHeaders;
@@ -62,6 +63,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundInWishlistCustomerException.class)
     public ResponseEntity<Object> handleProductNotFoundException(ProductNotFoundInWishlistCustomerException ex) {
+        ApiErrorResponse apiErrorMessage = ApiErrorResponse
+                .builder()
+                .status(ex.getStatusCode())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiErrorMessage);
+    }
+
+    @ExceptionHandler(CustomerWishlistNotFoundException.class)
+    public ResponseEntity<Object> handleCustomerWishlistNotFoundException(CustomerWishlistNotFoundException ex) {
         ApiErrorResponse apiErrorMessage = ApiErrorResponse
                 .builder()
                 .status(ex.getStatusCode())
