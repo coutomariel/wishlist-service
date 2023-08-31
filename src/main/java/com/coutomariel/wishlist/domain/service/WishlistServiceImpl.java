@@ -1,7 +1,9 @@
 package com.coutomariel.wishlist.domain.service;
 
+import com.coutomariel.wishlist.api.response.WishlistResponse;
 import com.coutomariel.wishlist.domain.entity.Product;
 import com.coutomariel.wishlist.domain.entity.Wishlist;
+import com.coutomariel.wishlist.domain.exception.CustomerWishlistNotFoundException;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
 import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.repository.WishlistRepository;
@@ -66,8 +68,10 @@ public class WishlistServiceImpl implements WishlistService {
     }
 
     @Override
-    public List<Product> getCustomerWishlist(String customerId) {
-        return null;
+    public Wishlist getCustomerWishlist(String customerId) {
+        return repository.findById(customerId).orElseThrow(()-> new CustomerWishlistNotFoundException(String.format(
+                "Não foi encontrada wishlist associada ao customerID $s", customerId)
+        ));
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.coutomariel.wishlist.api.controller;
 import com.coutomariel.wishlist.api.request.ProductRequest;
 import com.coutomariel.wishlist.domain.entity.Product;
 import com.coutomariel.wishlist.domain.entity.Wishlist;
+import com.coutomariel.wishlist.domain.exception.CustomerWishlistNotFoundException;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
 import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.service.WishlistServiceImpl;
@@ -21,13 +22,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
@@ -48,6 +49,7 @@ class WishlistControllerTest {
     private WishlistControllerTest wishlistControllerTest;
 
 
+    private static final String ROUTE_SEARCH_CUSTOMER_WISHLIST = "/wishlist/{customerId}/products";
     private static final String ROUTE_ADD_PRODUCT = "/wishlist/{customerId}/products";
     private static final String ROUTE_REMOVE_PRODUCT = "/wishlist/{customerId}/products/{productId}";
 
@@ -126,6 +128,36 @@ class WishlistControllerTest {
                 .when(service).remove(randomId, randomId);
 
         mvc.perform(delete(ROUTE_REMOVE_PRODUCT, randomId, randomId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(jsonPath("$.status").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("mensagem de erro"));
+    }
+
+    @Test
+    @DisplayName("given a search request by exists customer wishlist, then returns it and ok")
+    void getCustomerWishlistSuccessfully() throws Exception {
+        Integer wishlistSize = 2;
+        String randomId = UUID.randomUUID().toString();
+        List<Product> products = MockUtils.mockProductList(wishlistSize);
+        Wishlist mockWishList = Wishlist.builder()
+                .id(randomId)
+                .products(products)
+                .build();
+
+        when(service.getCustomerWishlist(randomId)).thenReturn(mockWishList);
+
+        mvc.perform(get(ROUTE_SEARCH_CUSTOMER_WISHLIST, randomId))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @DisplayName("given a search request by not exists customer wishlist, then returns not found")
+    void searchCustomerWishlistThatNotExists() throws Exception {
+        String randomId = UUID.randomUUID().toString();
+        doThrow(new CustomerWishlistNotFoundException("mensagem de erro"))
+                .when(service).getCustomerWishlist(randomId);
+
+        mvc.perform(get(ROUTE_SEARCH_CUSTOMER_WISHLIST, randomId, randomId))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(jsonPath("$.status").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("mensagem de erro"));

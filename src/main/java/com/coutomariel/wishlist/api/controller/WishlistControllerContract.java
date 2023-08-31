@@ -47,7 +47,7 @@ public interface WishlistControllerContract {
     @Parameters(value = {
             @Parameter(name = "customerId", in = ParameterIn.PATH, description = "ID do cliente", required = true)
     })
-    List<ProductResponse> getCustomerWishlist(String customerId);
+    WishlistResponse getCustomerWishlist(String customerId);
 
     @Operation(description = "API para verificar se um produto existe na wishlist de um cliente.")
     @ApiResponses(value = {

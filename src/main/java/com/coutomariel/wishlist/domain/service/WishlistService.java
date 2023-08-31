@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface WishlistService {
     Wishlist add(String customerId, Product product);
     void remove(String customerId, String productId);
-    List<Product> getCustomerWishlist(String customerId);
+    Wishlist getCustomerWishlist(String customerId);
     Optional<Product> getProductByIdInCustomerWishList(String customerId, String productId);
 }
