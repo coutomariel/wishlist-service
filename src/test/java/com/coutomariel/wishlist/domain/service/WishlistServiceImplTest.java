@@ -6,21 +6,21 @@ import com.coutomariel.wishlist.domain.exception.CustomerWishlistNotFoundExcepti
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
 import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.repository.WishlistRepository;
+import com.coutomariel.wishlist.utils.MockUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.coutomariel.wishlist.utils.MockUtils.*;
 import static java.lang.String.format;
@@ -36,6 +36,10 @@ class WishlistServiceImplTest {
     @InjectMocks
     private WishlistServiceImpl service;
 
+    @Captor
+    ArgumentCaptor<Wishlist> wishlistCaptor;
+    private final Integer wishlistLimitProducts = 20;
+
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(service, "wishlistLimitProducts", 20);
@@ -44,27 +48,67 @@ class WishlistServiceImplTest {
     @Test
     @DisplayName("Given a valid product to add and customer without wishlist, then create a new wishlist")
     void createNewCustomerWishlistSuccessfully() {
-        Product product = mockProduct();
+        Product mockProductToAdd = mockProduct();
         String customerId = randomId();
 
         Wishlist mockSavedWishlist = Wishlist.builder()
                 .id(customerId)
-                .products(Collections.singletonList(product))
+                .products(Collections.singletonList(mockProductToAdd))
                 .build();
 
         when(repository.findById(anyString())).thenReturn(Optional.empty());
         when(repository.save(any(Wishlist.class))).thenReturn(mockSavedWishlist);
 
-        Wishlist result = service.add(customerId, product);
+        Wishlist result = service.add(customerId, mockProductToAdd);
         List<Product> products = result.getProducts();
 
         Assertions.assertEquals(1, products.size());
         Assertions.assertEquals(customerId, result.getId());
         Assertions.assertEquals(customerId, result.getId());
 
+        verify(repository).save(wishlistCaptor.capture());
+        Wishlist resultCapture = wishlistCaptor.getValue();
+        Integer sizeListOfCapture = resultCapture.getProducts().size();
+        Product firstProductOfCapture = resultCapture.getProducts().get(0);
+
+        Assertions.assertEquals(1, sizeListOfCapture);
+        Assertions.assertEquals(mockProductToAdd.getProductId(), firstProductOfCapture.getProductId());
+
         verify(repository, times(1)).findById(anyString());
         verify(repository, times(1)).save(any(Wishlist.class));
 
+    }
+
+    @Test
+    @DisplayName("Given a valid product to add and customer without wishlist, then create a new wishlist")
+    void createNewCustomerAndRemoveOldestBecauseLimitWishlistSuccessfully() {
+        Integer limitItems = wishlistLimitProducts;
+        Integer firstElementIndex = wishlistLimitProducts -1;
+        Integer lastElementIndex = 0;
+
+        String mockCustomerId = randomId();
+        Product mockProductToAdd = mockProduct();
+        List<Product> mockProductList = MockUtils.mockProductList(limitItems);
+        Wishlist mockFullWishlistFromRepository = Wishlist.builder().id(mockCustomerId).products(mockProductList).build();
+
+        Product removeCandidate = mockProductList.get(lastElementIndex);
+
+        when(repository.findById(mockCustomerId)).thenReturn(Optional.of(mockFullWishlistFromRepository));
+        when(repository.save(any(Wishlist.class))).thenReturn(mockFullWishlistFromRepository);
+        service.add(mockCustomerId, mockProductToAdd);
+
+        verify(repository).save(wishlistCaptor.capture());
+        Wishlist resultCapture = wishlistCaptor.getValue();
+        Integer sizeListOfCapture = resultCapture.getProducts().size();
+        Product firstProductOfCapture = resultCapture.getProducts().get(firstElementIndex);
+        Product lastProductOfCapture = resultCapture.getProducts().get(lastElementIndex);
+
+        Assertions.assertEquals(limitItems, sizeListOfCapture);
+        Assertions.assertEquals(mockProductToAdd.getProductId(), firstProductOfCapture.getProductId());
+        Assertions.assertNotEquals(removeCandidate.getProductId(), lastProductOfCapture.getProductId());
+
+        verify(repository, times(1)).findById(mockCustomerId);
+        verify(repository, times(1)).save(any(Wishlist.class));
     }
 
     @Test

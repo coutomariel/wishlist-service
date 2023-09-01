@@ -9,7 +9,6 @@ spring:
 
 wishlist:
   limit-products: ${WISHLIST_LIMIT_PRODUCTS:20}
-
 springdoc:
   api-docs:
     path: /api-docs
