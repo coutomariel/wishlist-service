@@ -3,6 +3,7 @@ package com.coutomariel.wishlist.api.exception;
 import com.coutomariel.wishlist.domain.exception.CustomerWishlistNotFoundException;
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
 import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -26,6 +28,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request
     ) {
+        logger.error(ex.getMessage());
         Map<String, String> map = new HashMap<>();
         ex.getBindingResult()
                 .getFieldErrors()
@@ -43,6 +46,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
+        logger.error(ex.getMessage());
         ApiErrorResponse apiErrorMessage = ApiErrorResponse
                 .builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -52,7 +56,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ProductAlreadyExistsInCustomerWishlistException.class)
-    public ResponseEntity<Object> handleProductAlreadyExistsNotFoundException(ProductAlreadyExistsInCustomerWishlistException ex) {
+    public ResponseEntity<Object> handleProductAlreadyExistsNotFoundException(
+            ProductAlreadyExistsInCustomerWishlistException ex
+    ) {
+        logger.error(ex.getMessage());
         ApiErrorResponse apiErrorMessage = ApiErrorResponse
                 .builder()
                 .status(ex.getStatusCode())
@@ -63,6 +70,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundInWishlistCustomerException.class)
     public ResponseEntity<Object> handleProductNotFoundException(ProductNotFoundInWishlistCustomerException ex) {
+        logger.error(ex.getMessage());
         ApiErrorResponse apiErrorMessage = ApiErrorResponse
                 .builder()
                 .status(ex.getStatusCode())
@@ -73,6 +81,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(CustomerWishlistNotFoundException.class)
     public ResponseEntity<Object> handleCustomerWishlistNotFoundException(CustomerWishlistNotFoundException ex) {
+        logger.error(ex.getMessage());
         ApiErrorResponse apiErrorMessage = ApiErrorResponse
                 .builder()
                 .status(ex.getStatusCode())

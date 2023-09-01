@@ -6,6 +6,7 @@ import com.coutomariel.wishlist.domain.exception.CustomerWishlistNotFoundExcepti
 import com.coutomariel.wishlist.domain.exception.ProductAlreadyExistsInCustomerWishlistException;
 import com.coutomariel.wishlist.domain.exception.ProductNotFoundInWishlistCustomerException;
 import com.coutomariel.wishlist.domain.repository.WishlistRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +15,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class WishlistServiceImpl implements WishlistService {
 
-    private Integer wishlistLimitProducts;
+    private final Integer wishlistLimitProducts;
     private final WishlistRepository repository;
 
     public WishlistServiceImpl(@Value("${wishlist.limit-products}") Integer wishlistLimitProducts, WishlistRepository repository) {
@@ -35,7 +37,10 @@ public class WishlistServiceImpl implements WishlistService {
         List<Product> products = wishlist.getProducts();
         if (products.contains(product)) throw new ProductAlreadyExistsInCustomerWishlistException(product.getProductId());
 
-        if (wishlistIsFull(products)) removeOldestProduct(products);
+        if (wishlistIsFull(products)) {
+            log.info("wish list is full.");
+            removeOldestProduct(products);
+        }
 
         products.add(product);
         return repository.save(wishlist);
@@ -46,6 +51,7 @@ public class WishlistServiceImpl implements WishlistService {
     }
 
     private void removeOldestProduct(List<Product> products) {
+        log.warn("Removing oldest product.");
         products.remove(0);
     }
 
