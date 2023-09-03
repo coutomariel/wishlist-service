@@ -60,7 +60,7 @@ Também disponibilizado na pasta raiz da aplicação um arquivo `wishlist.postma
 2. Configure as propriedades do banco de dados no arquivo `application.yml`.
 3. O banco de dados, pode ser provisionado a partir do arquivo `docker-compose.yml`
 ```
-docker-compose ps -d
+docker-compose up -d
 ```
 . *Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
 4. Execute o projeto usando sua IDE ou através do comando `./mvnw spring-boot:run`.
